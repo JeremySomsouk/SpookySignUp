@@ -22,8 +22,10 @@ class User:
     def activate(self, provided_code: str) -> None:
         """Activates the user if the provided code matches and is not expired"""
         if self.is_active:
-            raise UserAlreadyActiveException(f"User ({self.email}) already active.")
-        if self.activation_code is None:
+            raise UserAlreadyActiveException(
+                f"User ({self.email.value}) already active."
+            )
+        if self.activation_code is None or self.activation_code == "":
             raise ValueError("No activation code set")
         if self.activation_code.value != provided_code:
             raise InvalidActivationCodeException("Invalid activation code.")

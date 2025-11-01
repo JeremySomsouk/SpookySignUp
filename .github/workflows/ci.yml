@@ -31,7 +31,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -53,6 +52,9 @@ jobs:
           APP_URL: http://localhost:8080
           MAIL_SERVER_URL: http://localhost:8025
         run: |
+          # Start your FastAPI app in the background
           uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8080 --reload &
+          # Wait for the app to be ready
           sleep 10
+          # Run e2e tests
           pytest tests/ -m e2e -v

@@ -84,7 +84,7 @@ services:
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
     ports:
-      - "5431:5432"
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
       interval: 1s
@@ -94,8 +94,8 @@ services:
     image: mailhog/mailhog:latest
     container_name: test_mailhog
     ports:
-      - "1024:1025"
-      - "8024:8025"
+      - "1025:1025"
+      - "8025:8025"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "1025"]
       interval: 1s
@@ -118,7 +118,7 @@ services:
                     user="test_user",
                     password="test_password",
                     host="localhost",
-                    port=5431,
+                    port=5432,
                     connect_timeout=5,
                 )
                 conn.close()
@@ -160,7 +160,7 @@ def db_config(docker_compose):
         user="test_user",
         password="test_password",
         host="localhost",
-        port=5431,
+        port=5432,
     )
 
 
@@ -178,7 +178,7 @@ def initialized_db(db_config):
                     user=db_config.user,
                     password=db_config.password,
                     host=db_config.host,
-                    port=5431,
+                    port=db_config.port,
                     connect_timeout=5,
                 )
                 with conn.cursor() as cur:
@@ -214,7 +214,7 @@ def mailhog_container(docker_compose):
     """Ensure MailHog is running via docker-compose"""
     for i in range(30):
         try:
-            response = requests.get("http://localhost:8024/api/v2/messages")
+            response = requests.get("http://localhost:8025/api/v2/messages")
             if response.status_code == 200:
                 print(f"MailHog ready after {i + 1} attempts")
                 break
@@ -222,7 +222,7 @@ def mailhog_container(docker_compose):
             time.sleep(1)
     else:
         pytest.fail("Could not connect to MailHog")
-    requests.delete("http://localhost:8024/api/v1/messages")
+    requests.delete("http://localhost:8025/api/v1/messages")
     yield
 
 
@@ -230,7 +230,7 @@ def mailhog_container(docker_compose):
 def smtp_config():
     """SMTP configuration for MailHog"""
     return SmtpConfig(
-        host="localhost", port=1024, sender_email="noreply@spookymotion.com", timeout=10
+        host="localhost", port=1025, sender_email="noreply@spookymotion.com", timeout=10
     )
 
 

@@ -1,8 +1,7 @@
 name: CI
 
 on:
-  push:  # Runs on any push to any branch
-  pull_request:  # Runs on any pull request to any branch
+  push:
 
 jobs:
   test:

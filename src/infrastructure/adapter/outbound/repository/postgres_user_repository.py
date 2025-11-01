@@ -1,4 +1,3 @@
-# src/infrastructure/adapter/outbound/repository/postgres_user_repository.py
 import psycopg2
 from psycopg2.extras import DictCursor
 

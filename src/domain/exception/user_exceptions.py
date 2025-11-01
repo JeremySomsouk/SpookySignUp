@@ -4,6 +4,12 @@ class UserDomainException(Exception):
     pass
 
 
+class UserNotFoundException(UserDomainException):
+    """Raised when a user is not found with an email address."""
+
+    pass
+
+
 class UserAlreadyActiveException(UserDomainException):
     """Raised when trying to activate an already active user."""
 

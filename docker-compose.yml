@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - smtp
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=user_registration
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+    volumes:
+      - .:/app
+    command: uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8080 --reload
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_registration
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  smtp:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  postgres_data:

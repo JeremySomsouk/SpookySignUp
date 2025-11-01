@@ -5,6 +5,7 @@ from .user_exceptions import (
     EmailAlreadyExistsException,
     ExpiredActivationCodeException,
     InvalidCredentialsException,
+    UserNotFoundException,
 )
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "EmailAlreadyExistsException",
     "ExpiredActivationCodeException",
     "InvalidCredentialsException",
+    "UserNotFoundException",
 ]

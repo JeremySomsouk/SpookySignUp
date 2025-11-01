@@ -13,14 +13,12 @@ from src.infrastructure.config import DatabaseConfig, SmtpConfig
 def check_environment():
     """Check if Docker is available and working properly"""
     try:
-        # First check if docker command is available
         result = subprocess.run(
             ["docker", "--version"], capture_output=True, text=True, timeout=10
         )
         if result.returncode != 0:
             raise Exception("Docker CLI not found or not working")
 
-        # Test container execution
         result = subprocess.run(
             ["docker", "run", "--rm", "hello-world"],
             capture_output=True,

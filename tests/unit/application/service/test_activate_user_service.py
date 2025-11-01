@@ -40,7 +40,7 @@ class TestActivateUserService:
         )
 
     def test_activate_user_success(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should successfully activate a user with correct code"""
         # Given
@@ -59,7 +59,7 @@ class TestActivateUserService:
         mock_user_repository.save.assert_called_once_with(test_user)
 
     def test_activate_user_with_wrong_code(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should raise InvalidActivationCodeException when activation code is wrong"""
         # Given
@@ -75,7 +75,7 @@ class TestActivateUserService:
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_with_expired_code(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should raise ExpiredActivationCodeException when activation code is expired"""
         # Given
@@ -111,7 +111,7 @@ class TestActivateUserService:
         mock_user_repository.save.assert_not_called()
 
     def test_activate_already_active_user(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should raise ValueError when trying to activate an already active user"""
         # Given
@@ -129,7 +129,7 @@ class TestActivateUserService:
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_with_null_activation_code(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should raise ValueError when user has no activation code"""
         # Given
@@ -146,7 +146,7 @@ class TestActivateUserService:
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_repository_save_failure(
-            self, activate_user_service, mock_user_repository, test_user
+        self, activate_user_service, mock_user_repository, test_user
     ):
         """Should propagate exceptions when repository save fails"""
         # Given

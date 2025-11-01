@@ -11,7 +11,7 @@ jobs:
         python-version: ["3.14"]
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -20,7 +20,7 @@ jobs:
           - 5432:5432
         options: >-
           --health-cmd pg_isready
-          --health-interval 5s
+          --health-interval 10s
           --health-timeout 5s
           --health-retries 5
       mailhog:
@@ -53,7 +53,7 @@ jobs:
           MAIL_SERVER_URL: http://localhost:8025
         run: |
           # Start your FastAPI app in the background
-          uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8080 --reload &
+          uvicorn main:app --host 0.0.0.0 --port 8080 &
           # Wait for the app to be ready
           sleep 10
           # Run e2e tests

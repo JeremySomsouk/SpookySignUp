@@ -5,7 +5,7 @@ from src.domain.model import Email
 
 def test_email_validation():
     # Valid email
-    Email("test@example.com")
+    Email("test@spookymotion.com")
 
     # Invalid email format
     with pytest.raises(ValueError) as e:
@@ -14,5 +14,5 @@ def test_email_validation():
 
     # Email too long
     with pytest.raises(ValueError) as e:
-        Email("a" * 300 + "@example.com")
+        Email("a" * 300 + "@spookymotion.com")
     assert "Email too long" in str(e.value)

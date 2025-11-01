@@ -5,4 +5,7 @@ pytest==8.4.2
 click==8.3.0
 passlib==1.7.4
 bcrypt==4.0.1
+testcontainers==4.13.2
 black==25.9.0
+docker==7.1.0
+requests==2.32.5

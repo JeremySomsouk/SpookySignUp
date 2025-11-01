@@ -11,7 +11,7 @@ from src.domain.model import Email, User, ActivationCode
 
 
 def test_user_creation():
-    email = Email("test@example.com")
+    email = Email("test@spookymotion.com")
     user = User(email=email, password_hash="hashed_password")
     assert user.email == email
     assert not user.is_active
@@ -19,9 +19,9 @@ def test_user_creation():
 
 
 def test_user_activation_success():
-    email = Email("test@example.com")
+    email = Email("test@spookymotion.com")
     activation_code = ActivationCode(
-        value="1234", expires_at=datetime.now(timezone.utc) + timedelta(minutes=1)
+        value="1234", expires_at=ActivationCode.compute_expiration_datetime()
     )
     user = User(
         email=email, password_hash="hashed_password", activation_code=activation_code
@@ -33,9 +33,9 @@ def test_user_activation_success():
 
 
 def test_user_activation_fails_with_wrong_code():
-    email = Email("test@example.com")
+    email = Email("test@spookymotion.com")
     activation_code = ActivationCode(
-        value="1234", expires_at=datetime.now(timezone.utc) + timedelta(minutes=1)
+        value="1234", expires_at=ActivationCode.compute_expiration_datetime()
     )
     user = User(
         email=email, password_hash="hashed_password", activation_code=activation_code
@@ -47,7 +47,7 @@ def test_user_activation_fails_with_wrong_code():
 
 
 def test_user_activation_fails_with_expired_code():
-    email = Email("test@example.com")
+    email = Email("test@spookymotion.com")
     past = datetime.now(timezone.utc) - timedelta(minutes=1)
     activation_code = ActivationCode(value="1234", expires_at=past)
     user = User(
@@ -60,7 +60,7 @@ def test_user_activation_fails_with_expired_code():
 
 
 def test_user_activation_fails_if_already_active():
-    email = Email("test@example.com")
+    email = Email("test@spookymotion.com")
     user = User(email=email, password_hash="hashed_password", is_active=True)
 
     with pytest.raises(UserAlreadyActiveException) as e:

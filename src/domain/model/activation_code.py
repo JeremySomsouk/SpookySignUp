@@ -14,7 +14,7 @@ class ActivationCode:
     def generate_activation_code(cls) -> "ActivationCode":
         return cls(
             value=cls.generate_code(),
-            expires_at=datetime.now(timezone.utc) + timedelta(minutes=1),
+            expires_at=cls.compute_expiration_datetime(),
         )
 
     def has_code_expired(self) -> bool:
@@ -24,3 +24,7 @@ class ActivationCode:
     def generate_code() -> str:
         """Generate an activation code between 0000 and 9999."""
         return f"{secrets.randbelow(10000):04d}"
+
+    @staticmethod
+    def compute_expiration_datetime() -> datetime:
+        return datetime.now(timezone.utc) + timedelta(minutes=1)

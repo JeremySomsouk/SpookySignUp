@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from domain.model import ActivationCode
+from src.domain.model import ActivationCode
 
 
 def test_activation_new_code_generation():

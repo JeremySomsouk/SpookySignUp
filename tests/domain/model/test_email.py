@@ -1,6 +1,6 @@
 import pytest
 
-from domain.model import Email
+from src.domain.model import Email
 
 
 def test_email_validation():

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from domain.model import Email, User
+from src.domain.model import Email, User
 
 
 class UserRepositoryPort(ABC):

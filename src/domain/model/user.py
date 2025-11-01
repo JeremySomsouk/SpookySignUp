@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from domain.exception import (
+from src.domain.exception import (
     UserAlreadyActiveException,
     ExpiredActivationCodeException,
     InvalidActivationCodeException,

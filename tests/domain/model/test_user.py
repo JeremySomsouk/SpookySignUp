@@ -2,12 +2,12 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from domain.exception import (
+from src.domain.exception import (
     ExpiredActivationCodeException,
     InvalidActivationCodeException,
     UserAlreadyActiveException,
 )
-from domain.model import Email, User, ActivationCode
+from src.domain.model import Email, User, ActivationCode
 
 
 def test_user_creation():

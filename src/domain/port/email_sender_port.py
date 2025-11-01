@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from domain.model import Email
+from src.domain.model import Email
 
 
 class EmailSenderPort(ABC):

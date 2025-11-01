@@ -9,4 +9,3 @@ ARG MODE=app
 ENV MODE=${MODE}
 
 CMD ["sh", "-c", "if [ \"$MODE\" = \"test\" ]; then pytest tests/e2e/ -v; else python main.py; fi"]
-

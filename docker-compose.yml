@@ -1,22 +1,6 @@
 version: "3.8"
 
 services:
-  app:
-    build: .
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres
-      - smtp
-    environment:
-      - DB_HOST=postgres
-      - DB_NAME=user_registration
-      - DB_USER=postgres
-      - DB_PASSWORD=password
-    volumes:
-      - .:/app
-    command: uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8080 --reload
-
   postgres:
     image: postgres:13
     environment:
@@ -26,12 +10,53 @@ services:
       - "5432:5432"
     volumes:
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   smtp:
     image: mailhog/mailhog
     ports:
       - "1025:1025"
       - "8025:8025"
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "1025" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      smtp:
+        condition: service_healthy
+    environment:
+      - DB_HOST=postgres
+      - DB_NAME=user_registration
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - E2E_TEST=${E2E_TEST:-false}
+    volumes:
+      - .:/app
+    command: uvicorn src.interfaces.api.main:app --host 0.0.0.0 --port 8080 --reload
+
+  e2e-tests:
+    build:
+      context: .
+      args:
+        MODE: test
+    depends_on:
+      - app
+      - smtp
+    environment:
+      - APP_URL=http://app:8080
+      - MAIL_SERVER_URL=http://smtp:8025
+    command: pytest tests/e2e/ -m e2e -v
 volumes:
   postgres_data:

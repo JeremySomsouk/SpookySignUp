@@ -2,9 +2,14 @@
 # Signup - Clean Architecture Application with FastAPI and Docker
 [![CI](https://github.com/JeremySomsouk/SpookySignUp/actions/workflows/ci.yml/badge.svg)](https://github.com/JeremySomsouk/SpookySignUp/actions/workflows/ci.yml)
 
+[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Hexagonal Architecture](https://img.shields.io/badge/Architecture-Hexagonal-%23FF6B6B.svg?style=for-the-badge)](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software))
+[![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![MailHog](https://img.shields.io/badge/MailHog-000000?style=for-the-badge&logo=mailhog&logoColor=white)](https://github.com/mailhog/MailHog)
+[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
+[![Docker Compose](https://img.shields.io/badge/docker%20compose-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
 
 ## Project Overview
@@ -124,7 +129,7 @@ graph LR
 
 # How to run this application
 ```bash
-docker-compose up --build
+docker compose up
 ```
 
 ## Test the API
@@ -145,12 +150,17 @@ curl -X POST http://localhost:8080/api/v1/users/activate \
 ```
 
 # How to launch the automated tests
+## Launch the E2E tests
+```bash
+docker compose run e2e-tests
+```
+
 ## For unit tests ran from the container
 ```bash
-docker-compose up --build
+docker compose up
 ```
 ```bash
-docker-compose exec app pytest tests/unit/
+docker compose exec app pytest tests/unit/
 ```
 
 ## For all tests from local using testcontainers
@@ -171,14 +181,14 @@ Swagger UI: http://localhost:8080/docs
  | `/api/v1/users/activate` | POST | Activate a user account | `ActivateUserRequest` (activation_code) | `UserResponse`  (email, is_active)                   | 200: OK, 400: Bad Request, 401: Unauthorized, 422: Validation Error | Basic Auth |
 
 ## Example queries
-Registration
+**Registration**
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/register \
   -H "Content-Type: application/json" \
   -d '{"email": "account@spookymotion.com", "password": "mypassword123"}'
 ```
 
-Activation
+**Activation**
 ```bash
 curl -X POST http://localhost:8080/api/v1/users/activate \
   -u "account@spookymotion.com:mypassword123" \

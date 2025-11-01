@@ -21,7 +21,7 @@ def test_user_registration_flow():
     """
     email = uuid.uuid4().hex + "@spookymotion.com"
     reg_response = requests.post(
-        "http://app:8080/api/v1/users/register",
+        "http://localhost:8080/api/v1/users/register",
         json={"email": email, "password": "TestPass123!"},
     )
     assert reg_response.status_code == 201
@@ -29,7 +29,7 @@ def test_user_registration_flow():
     activation_code = get_activation_code(email)
 
     activ_response = requests.post(
-        "http://app:8080/api/v1/users/activate",
+        "http://localhost:8080/api/v1/users/activate",
         json={"activation_code": activation_code},
         auth=(email, "TestPass123!"),
     )
@@ -40,7 +40,7 @@ def get_activation_code(email):
     max_attempts = 5
     for _ in range(max_attempts):
         time.sleep(1)
-        response = requests.get("http://smtp:8025/api/v2/messages?limit=1&to=" + email)
+        response = requests.get("http://localhost:8025/api/v2/messages?limit=1&to=" + email)
         if response.json()["total"] > 0:
             email_content = response.json()["items"][0]
             # Extract 4-digit activation code from email body

@@ -15,7 +15,9 @@ class TestPostgresUserRepository:
             email=Email("test@spookymotion.com"),
             password_hash="hashed_password",
             is_active=False,
-            activation_code=ActivationCode(value="1234", expires_at=ActivationCode.compute_expiration_datetime())
+            activation_code=ActivationCode(
+                value="1234", expires_at=ActivationCode.compute_expiration_datetime()
+            ),
         )
 
         # When
@@ -38,17 +40,21 @@ class TestPostgresUserRepository:
             email=Email("update@spookymotion.com"),
             password_hash="original_password",
             is_active=False,
-            activation_code=ActivationCode(value="1111", expires_at=original_expiration)
+            activation_code=ActivationCode(
+                value="1111", expires_at=original_expiration
+            ),
         )
 
         repository.save(original_user)
 
-        updated_expiration = ActivationCode.compute_expiration_datetime() + timedelta(days=1)
+        updated_expiration = ActivationCode.compute_expiration_datetime() + timedelta(
+            days=1
+        )
         updated_user = User(
             email=Email("update@spookymotion.com"),  # Same email
             password_hash="updated_password",
             is_active=True,
-            activation_code=ActivationCode(value="2222", expires_at=updated_expiration)
+            activation_code=ActivationCode(value="2222", expires_at=updated_expiration),
         )
 
         # When

@@ -41,8 +41,8 @@ def test_save_user(user_repository):
         mock_conn  # Ensure the connection manager returns the mock
     )
     with patch(
-            "src.infrastructure.adapter.outbound.repository.postgres_user_repository.psycopg2.connect",
-            return_value=mock_conn,
+        "src.infrastructure.adapter.outbound.repository.postgres_user_repository.psycopg2.connect",
+        return_value=mock_conn,
     ):
         # When
         user_repository.save(user)
@@ -73,8 +73,8 @@ def test_find_by_email(user_repository):
     mock_conn.__enter__.return_value = mock_conn
 
     with patch(
-            "src.infrastructure.adapter.outbound.repository.postgres_user_repository.psycopg2.connect",
-            return_value=mock_conn,
+        "src.infrastructure.adapter.outbound.repository.postgres_user_repository.psycopg2.connect",
+        return_value=mock_conn,
     ):
         # When
         result = user_repository.find_by_email(email)

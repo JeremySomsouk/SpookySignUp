@@ -15,10 +15,7 @@ def check_environment():
     try:
         # First check if docker command is available
         result = subprocess.run(
-            ["docker", "--version"],
-            capture_output=True,
-            text=True,
-            timeout=10
+            ["docker", "--version"], capture_output=True, text=True, timeout=10
         )
         if result.returncode != 0:
             raise Exception("Docker CLI not found or not working")
@@ -28,7 +25,7 @@ def check_environment():
             ["docker", "run", "--rm", "hello-world"],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
         if result.returncode != 0:
             raise Exception(f"Docker test failed: {result.stderr}")
@@ -39,7 +36,7 @@ def check_environment():
                 capture_output=True,
                 text=True,
                 timeout=10,
-                check=True
+                check=True,
             )
             use_compose = "docker-compose"
         except:
@@ -49,17 +46,21 @@ def check_environment():
                     capture_output=True,
                     text=True,
                     timeout=10,
-                    check=True
+                    check=True,
                 )
                 use_compose = "docker compose"
             except Exception as e:
-                raise Exception(f"Neither docker-compose nor docker compose found: {str(e)}")
+                raise Exception(
+                    f"Neither docker-compose nor docker compose found: {str(e)}"
+                )
 
         print(f"Docker environment is ready (using {use_compose})")
         return use_compose
     except Exception as e:
-        pytest.exit(f"Docker environment not available: {str(e)}\n"
-                    "Please ensure Docker Desktop or Rancher Desktop is running properly.")
+        pytest.exit(
+            f"Docker environment not available: {str(e)}\n"
+            "Please ensure Docker Desktop or Rancher Desktop is running properly."
+        )
 
 
 compose_cmd = check_environment()
@@ -120,16 +121,23 @@ services:
                     password="test_password",
                     host="localhost",
                     port=5432,
-                    connect_timeout=5
+                    connect_timeout=5,
                 )
                 conn.close()
                 print(f"\n> PostgreSQL ready after {i + 1} attempts")
                 break
             except psycopg2.OperationalError as e:
                 if i == 29:  # Last attempt
-                    log_cmd = compose_cmd.split(" ") + ["-f", compose_file, "logs", "postgres"]
+                    log_cmd = compose_cmd.split(" ") + [
+                        "-f",
+                        compose_file,
+                        "logs",
+                        "postgres",
+                    ]
                     result = subprocess.run(log_cmd, capture_output=True, text=True)
-                    pytest.fail(f"Could not connect to PostgreSQL. Error: {str(e)}\nLogs:\n{result.stdout}")
+                    pytest.fail(
+                        f"Could not connect to PostgreSQL. Error: {str(e)}\nLogs:\n{result.stdout}"
+                    )
                 time.sleep(1)
 
         yield compose_file
@@ -154,7 +162,7 @@ def db_config(docker_compose):
         user="test_user",
         password="test_password",
         host="localhost",
-        port=5432
+        port=5432,
     )
 
 
@@ -173,11 +181,12 @@ def initialized_db(db_config):
                     password=db_config.password,
                     host=db_config.host,
                     port=db_config.port,
-                    connect_timeout=5
+                    connect_timeout=5,
                 )
                 with conn.cursor() as cur:
                     cur.execute("DROP TABLE IF EXISTS users")
-                    cur.execute("""
+                    cur.execute(
+                        """
                         CREATE TABLE users (
                             email VARCHAR(255) PRIMARY KEY,
                             password_hash VARCHAR(255) NOT NULL,
@@ -185,7 +194,8 @@ def initialized_db(db_config):
                             activation_code VARCHAR(4),
                             code_expires_at TIMESTAMPTZ
                         )
-                    """)
+                    """
+                    )
                 conn.commit()
                 print("> Database initialized successfully")
                 return db_config
@@ -222,10 +232,7 @@ def mailhog_container(docker_compose):
 def smtp_config():
     """SMTP configuration for MailHog"""
     return SmtpConfig(
-        host="localhost",
-        port=1025,
-        sender_email="noreply@spookymotion.com",
-        timeout=10
+        host="localhost", port=1025, sender_email="noreply@spookymotion.com", timeout=10
     )
 
 

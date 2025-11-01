@@ -9,28 +9,10 @@ jobs:
     strategy:
       matrix:
         python-version: ["3.14"]
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: testdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      mailhog:
-        image: mailhog/mailhog
-        ports:
-          - 8025:8025
-          - 1025:1025
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
@@ -44,17 +26,5 @@ jobs:
       - name: Run black (check formatting)
         run: black --check src/ tests/
 
-      - name: Run unit tests
-        run: pytest tests/ -m "not e2e"
-
-      - name: Run e2e tests
-        env:
-          APP_URL: http://localhost:8080
-          MAIL_SERVER_URL: http://localhost:8025
-        run: |
-          # Start your FastAPI app in the background
-          uvicorn main:app --host 0.0.0.0 --port 8080 &
-          # Wait for the app to be ready
-          sleep 10
-          # Run e2e tests
-          pytest tests/ -m e2e -v
+      - name: Run pytest
+        run: pytest tests/

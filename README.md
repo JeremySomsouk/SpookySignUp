@@ -2,14 +2,13 @@
 # Signup - Clean Architecture Application with FastAPI and Docker
 [![CI](https://github.com/JeremySomsouk/SpookySignUp/actions/workflows/ci.yml/badge.svg)](https://github.com/JeremySomsouk/SpookySignUp/actions/workflows/ci.yml)
 
+[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
 [![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://www.python.org/)
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Hexagonal Architecture](https://img.shields.io/badge/Architecture-Hexagonal-%23FF6B6B.svg?style=for-the-badge)](https://en.wikipedia.org/wiki/Hexagonal_architecture_(software))
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Docker Compose](https://img.shields.io/badge/docker%20compose-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 [![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![MailHog](https://img.shields.io/badge/MailHog-000000?style=for-the-badge&logo=mailhog&logoColor=white)](https://github.com/mailhog/MailHog)
-[![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/features/actions)
-[![Docker Compose](https://img.shields.io/badge/docker%20compose-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/compose/)
 
 
 ## Project Overview
@@ -140,10 +139,10 @@ curl -X POST http://localhost:8080/api/v1/users/register \
   -d '{"email": "account@spookymotion.com", "password": "mypassword123"}'
 ```
 
-2) Retrieve the email sent here: http://localhost:8025/
+2) Retrieve the email sent here: http://localhost:8025/, and the user_id from the previous response
 3) Activate the account 
 ```bash
-curl -X POST http://localhost:8080/api/v1/users/activate \
+curl -X POST http://localhost:8080/api/v1/users/a75ea3e8-087f-407b-aa72-2f54e24ae16e/activate \
   -u "account@spookymotion.com:mypassword123" \
   -H "Content-Type: application/json" \
   -d '{"activation_code": "{{ the retrieved activation code }}"}'
@@ -175,10 +174,10 @@ The API is self-documenting with:
 Swagger UI: http://localhost:8080/docs
 
 ## User Registration Endpoints
-   Endpoint | Method | Description | Request Body | Response                          | Status Codes | Authentication |
- |----------|--------|-------------|--------------|-----------------------------------|--------------|----------------|
- | `/api/v1/users/register` | POST | Register a new user | `RegisterUserRequest` (email, password) | `UserResponse` (email, is_active) | 201: Created, 400: Bad Request, 422: Validation Error | None |
- | `/api/v1/users/activate` | POST | Activate a user account | `ActivateUserRequest` (activation_code) | `UserResponse`  (email, is_active)                   | 200: OK, 400: Bad Request, 401: Unauthorized, 422: Validation Error | Basic Auth |
+ Endpoint                           | Method | Description | Request Body | Response                               | Status Codes | Authentication |
+ |------------------------------------|--------|-------------|--------------|----------------------------------------|--------------|----------------|
+ | `/api/v1/users/register`           | POST | Register a new user | `RegisterUserRequest` (email, password) | `UserResponse` (id, email, is_active)  | 201: Created, 400: Bad Request, 422: Validation Error | None |
+ | `/api/v1/users/{user_id}/activate` | POST | Activate a user account | `ActivateUserRequest` (activation_code) | `UserResponse`  (id, email, is_active) | 200: OK, 400: Bad Request, 401: Unauthorized, 422: Validation Error | Basic Auth |
 
 ## Example queries
 **Registration**
@@ -190,17 +189,16 @@ curl -X POST http://localhost:8080/api/v1/users/register \
 
 **Activation**
 ```bash
-curl -X POST http://localhost:8080/api/v1/users/activate \
+curl -X POST http://localhost:8080/api/v1/users/a75ea3e8-087f-407b-aa72-2f54e24ae16e/activate \
   -u "account@spookymotion.com:mypassword123" \
   -H "Content-Type: application/json" \
   -d '{"activation_code": "9494"}'
 ```
 
 # Improvements
-- Using UUIDs instead of the email as the primary key would have been better for the User domain, as they provide globally unique identifiers across distributed systems, enhance security by making IDs unguessable, and maintain consistency from the controller through the database without exposing user data, + the user can change its email.
+- Add openapi contract for back-end signature generation, could also do front-end KMP client generation
 - Add comprehensive input validation at both API and domain layers
 - Enhance error handling with custom exceptions and consistent error responses, custom error codes for front-end & customer service
-- Add openapi contract for back-end signature generation, could also do front-end KMP client generation
 - Security
   - Change the authentication with a proper JWT instead 
   - Add email third-party verification at registration

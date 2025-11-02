@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 import pytest
+import uuid
 
 from src.domain.exception import (
     ExpiredActivationCodeException,
@@ -12,7 +13,8 @@ from src.domain.model import Email, User, ActivationCode
 
 def test_user_creation():
     email = Email("test@spookymotion.com")
-    user = User(email=email, password_hash="hashed_password")
+    user = User(id=uuid.uuid4(), email=email, password_hash="hashed_password")
+    assert user.id is not None
     assert user.email == email
     assert not user.is_active
     assert user.activation_code is None
@@ -24,7 +26,10 @@ def test_user_activation_success():
         value="1234", expires_at=ActivationCode.compute_expiration_datetime()
     )
     user = User(
-        email=email, password_hash="hashed_password", activation_code=activation_code
+        id=uuid.uuid4(),
+        email=email,
+        password_hash="hashed_password",
+        activation_code=activation_code,
     )
 
     user.activate("1234")
@@ -38,7 +43,10 @@ def test_user_activation_fails_with_wrong_code():
         value="1234", expires_at=ActivationCode.compute_expiration_datetime()
     )
     user = User(
-        email=email, password_hash="hashed_password", activation_code=activation_code
+        id=uuid.uuid4(),
+        email=email,
+        password_hash="hashed_password",
+        activation_code=activation_code,
     )
 
     with pytest.raises(InvalidActivationCodeException) as e:
@@ -51,7 +59,10 @@ def test_user_activation_fails_with_expired_code():
     past = datetime.now(timezone.utc) - timedelta(minutes=1)
     activation_code = ActivationCode(value="1234", expires_at=past)
     user = User(
-        email=email, password_hash="hashed_password", activation_code=activation_code
+        id=uuid.uuid4(),
+        email=email,
+        password_hash="hashed_password",
+        activation_code=activation_code,
     )
 
     with pytest.raises(ExpiredActivationCodeException) as e:
@@ -61,7 +72,9 @@ def test_user_activation_fails_with_expired_code():
 
 def test_user_activation_fails_if_already_active():
     email = Email("test@spookymotion.com")
-    user = User(email=email, password_hash="hashed_password", is_active=True)
+    user = User(
+        id=uuid.uuid4(), email=email, password_hash="hashed_password", is_active=True
+    )
 
     with pytest.raises(UserAlreadyActiveException) as e:
         user.activate("1234")

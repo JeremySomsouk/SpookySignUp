@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS users (
-    email VARCHAR(255) PRIMARY KEY,
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT FALSE,
     activation_code VARCHAR(4),

@@ -1,3 +1,5 @@
+import uuid
+
 from src.domain.model import User
 from src.domain.model import Email
 from src.domain.port import UserRepositoryPort
@@ -8,10 +10,10 @@ class ActivateUserService:
     def __init__(self, user_repository: UserRepositoryPort):
         self.user_repository = user_repository
 
-    def activate_user(self, email: str, activation_code: str) -> User:
-        user = self.user_repository.find_by_email(Email(email))
+    def activate_user(self, user_id: uuid.UUID, activation_code: str) -> User:
+        user = self.user_repository.find_by_id(user_id)
         if user is None:
-            raise UserNotFoundException(f"No user found with email: {email}")
+            raise UserNotFoundException(f"No user found with id: {user_id}")
 
         user.activate(activation_code)
         self.user_repository.save(user)

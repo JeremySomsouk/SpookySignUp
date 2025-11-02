@@ -26,14 +26,21 @@ def test_user_registration_flow():
     )
     assert reg_response.status_code == 201
 
+    # Extract the user_id from the response
+    reg_data = reg_response.json()  # Parse the JSON response
+    user_id = reg_data["id"]  # Extract the 'id' field
+    print(str(user_id))
+
+    # Get the activation code
     activation_code = get_activation_code(email)
 
-    activ_response = requests.post(
-        "http://app:8080/api/v1/users/activate",
+    # Activate the user
+    activate_response = requests.post(
+        f"http://app:8080/api/v1/users/{user_id}/activate",  # Use the extracted user_id
         json={"activation_code": activation_code},
         auth=(email, "TestPass123!"),
     )
-    assert activ_response.status_code == 200
+    assert activate_response.status_code == 200
 
 
 def get_activation_code(email):

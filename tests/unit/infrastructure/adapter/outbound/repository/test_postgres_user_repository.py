@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -24,6 +25,7 @@ class TestPostgresUserRepository:
     def test_save_user(self, user_repository):
         # Given
         user = User(
+            id=uuid.uuid4(),
             email=Email("test@spookymotion.com"),
             password_hash="hashed_password",
             is_active=False,
@@ -51,10 +53,53 @@ class TestPostgresUserRepository:
             mock_cursor.execute.assert_called_once()
             mock_conn.commit.assert_called_once()
 
-    def test_find_by_email(self, user_repository):
+    def test_find_by_id(self, user_repository):
         # Given
+        user_id = uuid.uuid4()
         email = Email("test@spookymotion.com")
         mock_row = {
+            "id": user_id,
+            "email": "test@spookymotion.com",
+            "password_hash": "hashed_password",
+            "is_active": False,
+            "activation_code": "1234",
+            "code_expires_at": "2025-01-01",
+        }
+
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+
+        mock_cursor.fetchone.return_value = mock_row
+        mock_cursor.__enter__.return_value = mock_cursor
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_conn.__enter__.return_value = mock_conn
+
+        with patch(
+            "src.infrastructure.adapter.outbound.repository.postgres_user_repository.psycopg2.connect",
+            return_value=mock_conn,
+        ):
+            # When
+            result = user_repository.find_by_id(user_id)
+
+            # Then
+            assert mock_conn.cursor.call_count == 1
+            mock_cursor.execute.assert_called_once_with(
+                "SELECT * FROM users WHERE id = %s", (user_id,)
+            )
+            assert isinstance(result, User)
+            assert result.id == user_id
+            assert result.email.value == "test@spookymotion.com"
+            assert result.password_hash == "hashed_password"
+            assert result.is_active is False
+            assert result.activation_code.value == "1234"
+            assert result.activation_code.expires_at == "2025-01-01"
+
+    def test_find_by_email(self, user_repository):
+        # Given
+        user_id = uuid.uuid4()
+        email = Email("test@spookymotion.com")
+        mock_row = {
+            "id": user_id,
             "email": "test@spookymotion.com",
             "password_hash": "hashed_password",
             "is_active": False,
@@ -83,6 +128,7 @@ class TestPostgresUserRepository:
                 "SELECT * FROM users WHERE email = %s", (email.value,)
             )
             assert isinstance(result, User)
+            assert result.id == user_id
             assert result.email.value == "test@spookymotion.com"
             assert result.password_hash == "hashed_password"
             assert result.is_active is False

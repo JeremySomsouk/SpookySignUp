@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+import uuid
 from fastapi import HTTPException, status
 
 from src.application.dto.request import ActivateUserRequest, RegisterUserRequest
@@ -15,7 +16,9 @@ class TestUserController:
         # Given
         mock_service = MagicMock()
         mock_get_service.return_value = mock_service
-        mock_user = User(Email("test@spookymotion.com"), "hashed_password", False, None)
+        mock_user = User(
+            uuid.uuid4(), Email("test@spookymotion.com"), "hashed_password", False, None
+        )
         mock_service.register_user.return_value = mock_user
         request = RegisterUserRequest(
             email="test@spookymotion.com", password="password123"
@@ -47,22 +50,23 @@ class TestUserController:
     @patch("src.infrastructure.dependencies.verify_credentials")
     def test_activate_user_success(self, mock_verify_credentials, mock_get_service):
         # Given
+        user_id = uuid.uuid4()
         mock_service = MagicMock(spec=ActivateUserService)
         mock_get_service.return_value = mock_service
-        mock_verify_credentials.return_value = "test@spookymotion.com"
-        mock_user = User(Email("test@spookymotion.com"), "hashed_password", True, None)
+        mock_user = User(
+            user_id, Email("test@spookymotion.com"), "hashed_password", True, None
+        )
+        mock_verify_credentials.return_value = mock_user
         mock_service.activate_user.return_value = mock_user
         request = ActivateUserRequest(activation_code="1234")
 
         # When
-        result = activate_user(request, mock_service, "test@spookymotion.com")
+        result = activate_user(user_id, request, mock_service, mock_user)
 
         # Then
         assert result.email == "test@spookymotion.com"
         assert result.is_active == True
-        mock_service.activate_user.assert_called_once_with(
-            "test@spookymotion.com", "1234"
-        )
+        mock_service.activate_user.assert_called_once_with(user_id, "1234")
 
     @patch("src.infrastructure.dependencies.get_activate_service")
     @patch("src.infrastructure.dependencies.verify_credentials")
@@ -70,15 +74,19 @@ class TestUserController:
         self, mock_verify_credentials, mock_get_service
     ):
         # Given
+        user_id = uuid.uuid4()
         mock_service = MagicMock(spec=ActivateUserService)
         mock_get_service.return_value = mock_service
-        mock_verify_credentials.return_value = "test@spookymotion.com"
+        mock_user = User(
+            user_id, Email("test@spookymotion.com"), "hashed_password", True, None
+        )
+        mock_verify_credentials.return_value = mock_user
         mock_service.activate_user.side_effect = ValueError("Invalid activation code")
         request = ActivateUserRequest(activation_code="000000")
 
         # When/Then
         with pytest.raises(HTTPException) as exception:
-            activate_user(request, mock_service, "test@spookymotion.com")
+            activate_user(user_id, request, mock_service, mock_user)
         assert exception.value.status_code == status.HTTP_400_BAD_REQUEST
         assert str(exception.value.detail) == "Invalid activation code"
 
@@ -88,14 +96,40 @@ class TestUserController:
         self, mock_verify_credentials, mock_get_service
     ):
         # Given
+        user_id = uuid.uuid4()
         mock_service = MagicMock(spec=ActivateUserService)
         mock_get_service.return_value = mock_service
-        mock_verify_credentials.return_value = "test@spookymotion.com"
+        mock_user = User(
+            user_id, Email("test@spookymotion.com"), "hashed_password", True, None
+        )
+        mock_verify_credentials.return_value = mock_user
         mock_service.activate_user.side_effect = Exception("Unexpected error")
         request = ActivateUserRequest(activation_code="123456")
 
         # When/Then
         with pytest.raises(HTTPException) as exception:
-            activate_user(request, mock_service, "test@spookymotion.com")
+            activate_user(user_id, request, mock_service, mock_user)
         assert exception.value.status_code == status.HTTP_400_BAD_REQUEST
         assert str(exception.value.detail) == "Unexpected error"
+
+    @patch("src.infrastructure.dependencies.get_activate_service")
+    @patch("src.infrastructure.dependencies.verify_credentials")
+    def test_activate_user_not_logged_account_error(
+        self, mock_verify_credentials, mock_get_service
+    ):
+        # Given
+        user_id = uuid.uuid4()
+        mock_service = MagicMock(spec=ActivateUserService)
+        mock_get_service.return_value = mock_service
+        mock_user = User(
+            user_id, Email("test@spookymotion.com"), "hashed_password", True, None
+        )
+        mock_verify_credentials.return_value = mock_user
+        request = ActivateUserRequest(activation_code="1234")
+
+        # When/Then
+        another_user_id = uuid.uuid4()
+        with pytest.raises(HTTPException) as exception:
+            activate_user(another_user_id, request, mock_service, mock_user)
+        assert exception.value.status_code == status.HTTP_403_FORBIDDEN
+        assert str(exception.value.detail) == "You can only activate your own account."

@@ -1,3 +1,4 @@
+import uuid
 from abc import ABC, abstractmethod
 from typing import Optional
 
@@ -10,6 +11,11 @@ class UserRepositoryPort(ABC):
     @abstractmethod
     def save(self, user: User) -> None:
         """Saves a user or update the code of a user to the repository"""
+        pass
+
+    @abstractmethod
+    def find_by_id(self, user_id: uuid.UUID) -> Optional[User]:
+        """Finds a user by id"""
         pass
 
     @abstractmethod

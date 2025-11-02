@@ -1,3 +1,4 @@
+import uuid
 from unittest.mock import MagicMock
 
 import pytest
@@ -30,6 +31,7 @@ class TestRegisterUserService:
     def test_user(self):
         """Create a test user with hashed password"""
         return User(
+            id=uuid.uuid4(),
             email=Email("test@spookymotion.com"),
             password_hash="hashed_password_123",
             is_active=False,

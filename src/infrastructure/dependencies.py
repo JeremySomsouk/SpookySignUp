@@ -3,7 +3,7 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from passlib.context import CryptContext
 
 from src.application.service import RegisterUserService, ActivateUserService
-from src.domain.model import Email
+from src.domain.model import Email, User
 from src.infrastructure.adapter.outbound import (
     PostgresUserRepository,
     MailhogEmailSender,
@@ -38,7 +38,7 @@ def get_activate_service(
 def verify_credentials(
     credentials: HTTPBasicCredentials = Security(HTTPBasic()),
     user_repository: PostgresUserRepository = Depends(get_user_repository),
-) -> str:
+) -> User:
     user = user_repository.find_by_email(Email(credentials.username))
     if not user or not pwd_context.verify(credentials.password, user.password_hash):
         raise HTTPException(
@@ -46,4 +46,4 @@ def verify_credentials(
             detail="Invalid credentials",
             headers={"WWW-Authenticate": "Basic"},
         )
-    return credentials.username
+    return user

@@ -1,3 +1,4 @@
+import uuid
 from passlib.context import CryptContext
 
 from src.domain.exception import EmailAlreadyExistsException
@@ -22,6 +23,7 @@ class RegisterUserService:
         password_hash = self.crypt_context.hash(plain_password)
         activation_code = ActivationCode.generate_activation_code()
         user = User(
+            id=uuid.uuid4(),
             email=user_email,
             password_hash=password_hash,
             activation_code=activation_code,

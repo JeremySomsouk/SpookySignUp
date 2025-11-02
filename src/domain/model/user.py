@@ -1,3 +1,4 @@
+import uuid
 from dataclasses import dataclass
 from typing import Optional
 
@@ -14,6 +15,7 @@ from .email import Email
 class User:
     """Domain entity representing a user account"""
 
+    id: uuid.UUID
     email: Email
     password_hash: str
     is_active: bool = False

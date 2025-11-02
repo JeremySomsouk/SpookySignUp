@@ -1,3 +1,4 @@
+import uuid
 from datetime import timedelta
 
 from src.domain.model import User, Email, ActivationCode
@@ -10,8 +11,10 @@ class TestPostgresUserRepository:
     def test_save_and_find_user(self, initialized_db):
         """Should save a user and then find them by email"""
         # Given
+        user_id = uuid.uuid4()
         repository = PostgresUserRepository(initialized_db)
         test_user = User(
+            id=user_id,
             email=Email("test@spookymotion.com"),
             password_hash="hashed_password",
             is_active=False,
@@ -26,6 +29,7 @@ class TestPostgresUserRepository:
 
         # Then
         assert found_user is not None
+        assert found_user.id == str(user_id)
         assert found_user.email.value == test_user.email.value
         assert found_user.password_hash == test_user.password_hash
         assert found_user.is_active == test_user.is_active
@@ -34,9 +38,11 @@ class TestPostgresUserRepository:
     def test_update_user_fields(self, initialized_db):
         """Should update all fields when saving an existing user"""
         # Given
+        user_id = uuid.uuid4()
         repository = PostgresUserRepository(initialized_db)
         original_expiration = ActivationCode.compute_expiration_datetime()
         original_user = User(
+            id=user_id,
             email=Email("update@spookymotion.com"),
             password_hash="original_password",
             is_active=False,
@@ -51,6 +57,7 @@ class TestPostgresUserRepository:
             days=1
         )
         updated_user = User(
+            id=user_id,
             email=Email("update@spookymotion.com"),  # Same email
             password_hash="updated_password",
             is_active=True,
@@ -63,6 +70,7 @@ class TestPostgresUserRepository:
 
         # Then
         assert found_user is not None
+        assert found_user.id == str(updated_user.id)
         assert found_user.email.value == updated_user.email.value
         assert found_user.password_hash == updated_user.password_hash
         assert found_user.is_active == updated_user.is_active

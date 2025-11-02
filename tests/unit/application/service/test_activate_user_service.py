@@ -2,6 +2,7 @@ from datetime import timedelta
 from unittest.mock import MagicMock
 
 import pytest
+import uuid
 
 from src.application.service.activate_user_service import ActivateUserService
 from src.domain.exception import (
@@ -31,6 +32,7 @@ class TestActivateUserService:
     def test_user(self):
         """Create a test user with activation code"""
         return User(
+            id=uuid.UUID("6548f7ca-6e09-45dc-b417-56632df142f1"),
             email=Email("test@spookymotion.com"),
             password_hash="hashed_password",
             is_active=False,
@@ -44,18 +46,16 @@ class TestActivateUserService:
     ):
         """Should successfully activate a user with correct code"""
         # Given
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
 
         # When
-        result = activate_user_service.activate_user("test@spookymotion.com", "1234")
+        result = activate_user_service.activate_user(test_user.id, "1234")
 
         # Then
         assert result == test_user
         assert result.is_active is True
         assert result.activation_code is None
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_called_once_with(test_user)
 
     def test_activate_user_with_wrong_code(
@@ -63,15 +63,13 @@ class TestActivateUserService:
     ):
         """Should raise InvalidActivationCodeException when activation code is wrong"""
         # Given
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
 
         # When/Then
         with pytest.raises(InvalidActivationCodeException) as exception:
-            activate_user_service.activate_user("test@spookymotion.com", "0000")
+            activate_user_service.activate_user(test_user.id, "0000")
         assert "Invalid activation code" in str(exception.value)
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_with_expired_code(
@@ -83,31 +81,26 @@ class TestActivateUserService:
             value="1234",
             expires_at=ActivationCode.compute_expiration_datetime() - timedelta(days=1),
         )
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
 
         # When/Then
         with pytest.raises(ExpiredActivationCodeException) as exception:
-            activate_user_service.activate_user("test@spookymotion.com", "1234")
+            activate_user_service.activate_user(test_user.id, "1234")
         assert "Activation code has expired" in str(exception.value)
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_not_found(self, activate_user_service, mock_user_repository):
         """Should raise UserNotFoundException when user is not found"""
         # Given
-        mock_user_repository.find_by_email.return_value = None
+        mock_user_repository.find_by_id.return_value = None
 
         # When/Then
+        unknown_user_id = uuid.uuid4()
         with pytest.raises(UserNotFoundException) as exception:
-            activate_user_service.activate_user("nonexistent@spookymotion.com", "1234")
-        assert "No user found with email: nonexistent@spookymotion.com" in str(
-            exception.value
-        )
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("nonexistent@spookymotion.com")
-        )
+            activate_user_service.activate_user(unknown_user_id, "1234")
+        assert "No user found with id: " + str(unknown_user_id) in str(exception.value)
+        mock_user_repository.find_by_id.assert_called_once_with(unknown_user_id)
         mock_user_repository.save.assert_not_called()
 
     def test_activate_already_active_user(
@@ -117,15 +110,13 @@ class TestActivateUserService:
         # Given
         test_user.is_active = True
         test_user.activation_code = None
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
 
         # When/Then
         with pytest.raises(UserAlreadyActiveException) as exception:
-            activate_user_service.activate_user("test@spookymotion.com", "1234")
+            activate_user_service.activate_user(test_user.id, "1234")
         assert "User (test@spookymotion.com) already active" in str(exception.value)
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_with_null_activation_code(
@@ -134,15 +125,13 @@ class TestActivateUserService:
         """Should raise ValueError when user has no activation code"""
         # Given
         test_user.activation_code = None
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
 
         # When/Then
         with pytest.raises(ValueError) as exception:
-            activate_user_service.activate_user("test@spookymotion.com", "1234")
+            activate_user_service.activate_user(test_user.id, "1234")
         assert "No activation code set" in str(exception.value)
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_not_called()
 
     def test_activate_user_repository_save_failure(
@@ -150,14 +139,12 @@ class TestActivateUserService:
     ):
         """Should propagate exceptions when repository save fails"""
         # Given
-        mock_user_repository.find_by_email.return_value = test_user
+        mock_user_repository.find_by_id.return_value = test_user
         mock_user_repository.save.side_effect = RuntimeError("Database error")
 
         # When/Then
         with pytest.raises(RuntimeError) as exception:
-            activate_user_service.activate_user("test@spookymotion.com", "1234")
+            activate_user_service.activate_user(test_user.id, "1234")
         assert "Database error" in str(exception.value)
-        mock_user_repository.find_by_email.assert_called_once_with(
-            Email("test@spookymotion.com")
-        )
+        mock_user_repository.find_by_id.assert_called_once_with(test_user.id)
         mock_user_repository.save.assert_called_once_with(test_user)

@@ -202,6 +202,7 @@ curl -X POST http://localhost:8080/api/v1/users/activate \
 - Enhance error handling with custom exceptions and consistent error responses, custom error codes for front-end & customer service
 - Add openapi contract for back-end signature generation, could also do front-end KMP client generation
 - Security
+  - Change the authentication with a proper JWT instead 
   - Add email third-party verification at registration
   - Add password verification
   - Add proper CORS & CSRF configurations

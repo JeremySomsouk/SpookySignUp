@@ -11,7 +11,7 @@ class TestMailhogIntegration:
     def test_send_activation_email(self, email_sender, mailhog_container):
         # Given
         test_email = Email("user@spookymotion.com")
-        activation_code = "123456"
+        activation_code = "9192"
         requests.delete("http://localhost:8025/api/v1/messages")
 
         # When
@@ -31,4 +31,4 @@ class TestMailhogIntegration:
         assert email_data["From"]["Mailbox"] == "noreply"
         assert email_data["From"]["Domain"] == "spookymotion.com"
         assert email_data["Content"]["Headers"]["Subject"][0] == "Activate Your Account"
-        assert "Your activation code is: 123456" in email_data["Content"]["Body"]
+        assert "Your activation code is: 9192" in email_data["Content"]["Body"]

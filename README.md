@@ -196,3 +196,22 @@ curl -X POST http://localhost:8080/api/v1/users/activate \
   -d '{"activation_code": "9494"}'
 ```
 
+# Improvements
+- Using UUIDs instead of the email as the primary key would have been better for the User domain, as they provide globally unique identifiers across distributed systems, enhance security by making IDs unguessable, and maintain consistency from the controller through the database without exposing user data, + the user can change its email.
+- Add comprehensive input validation at both API and domain layers
+- Enhance error handling with custom exceptions and consistent error responses, custom error codes for front-end & customer service
+- Add openapi contract for back-end signature generation, could also do front-end KMP client generation
+- Security
+  - Change the authentication with a proper JWT instead 
+  - Add email third-party verification at registration
+  - Add password verification
+  - Add proper CORS & CSRF configurations
+  - Add rate-limiting
+- Observability
+  - Better logging
+  - Add metrics
+- Resilience
+  - Add healthcheck endpoints for k8s
+  - Add proper connection timeouts
+  - Add circuit-breakers for third-party calls
+  - Add proper transaction management for db operations

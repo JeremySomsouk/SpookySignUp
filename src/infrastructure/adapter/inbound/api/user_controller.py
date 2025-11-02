@@ -29,7 +29,7 @@ def register_user(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@router.post("/activate", status_code=status.HTTP_200_OK)
+@router.post("/activate", response_model=UserResponse, status_code=status.HTTP_200_OK)
 def activate_user(
     request: ActivateUserRequest,
     service: ActivateUserService = Depends(get_activate_service),
